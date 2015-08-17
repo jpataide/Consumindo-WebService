@@ -1,4 +1,4 @@
-package com.jpataide.project.data;
+package com.jpataide.project.objects;
 
 import java.util.ArrayList;
 

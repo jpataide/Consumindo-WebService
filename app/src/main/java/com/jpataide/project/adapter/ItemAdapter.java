@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.android.volley.toolbox.NetworkImageView;
 import com.jpataide.project.Interfaces.IServerHandler;
 import com.jpataide.project.R;
-import com.jpataide.project.data.Item;
+import com.jpataide.project.objects.Item;
 import com.jpataide.project.utils.AppController;
 
 import java.util.List;

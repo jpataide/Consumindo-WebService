@@ -3,8 +3,8 @@ package com.jpataide.project.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jpataide.project.Interfaces.IServerHandler;
-import com.jpataide.project.data.Item;
-import com.jpataide.project.data.Library;
+import com.jpataide.project.objects.Item;
+import com.jpataide.project.objects.Library;
 
 import org.json.JSONException;
 import org.json.JSONObject;

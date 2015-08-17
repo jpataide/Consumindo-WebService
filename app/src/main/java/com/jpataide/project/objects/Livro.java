@@ -1,4 +1,4 @@
-package com.jpataide.project.data;
+package com.jpataide.project.objects;
 
 /**
  * Created by jpataide on 8/16/15.

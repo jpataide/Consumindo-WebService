@@ -21,7 +21,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.jpataide.project.Interfaces.IServerHandler;
 import com.jpataide.project.R;
 import com.jpataide.project.adapter.ItemAdapter;
-import com.jpataide.project.data.Item;
+import com.jpataide.project.objects.Item;
 import com.jpataide.project.utils.AppController;
 import com.jpataide.project.utils.LivroUtils;
 

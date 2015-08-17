@@ -1,6 +1,4 @@
-package com.jpataide.project.adapter;
-
-import com.jpataide.project.data.ImageLinks;
+package com.jpataide.project.objects;
 
 /**
  * Created by jpataide on 8/17/15.

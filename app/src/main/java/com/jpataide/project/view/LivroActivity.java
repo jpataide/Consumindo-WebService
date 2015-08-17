@@ -15,7 +15,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 import com.jpataide.project.Interfaces.IServerHandler;
 import com.jpataide.project.R;
-import com.jpataide.project.data.Item;
+import com.jpataide.project.objects.Item;
 import com.jpataide.project.utils.AppController;
 import com.jpataide.project.utils.LivroUtils;
 
@@ -105,9 +105,15 @@ public class LivroActivity extends BaseActivity implements IServerHandler, Respo
                 txtDescricao.setText(livro.getVolumeInfo().getDescription());
                 txtEditora.setText(livro.getVolumeInfo().getPublisher());
                 txtPaginas.setText(livro.getVolumeInfo().getPageCount());
-                img.setImageUrl(
-                        livro.getVolumeInfo().getImageLinks().getThumbnail(),
-                        AppController.getInstance().getImageLoader());
+                if (livro.getVolumeInfo().getImageLinks() != null) {
+                    img.setImageUrl(
+                            livro.getVolumeInfo().getImageLinks().getThumbnail(),
+                            AppController.getInstance().getImageLoader());
+                } else {
+                    img.setImageUrl(
+                            "",
+                            AppController.getInstance().getImageLoader());
+                }
                 progress.setVisibility(View.GONE);
                 layout.setVisibility(View.VISIBLE);
             }
