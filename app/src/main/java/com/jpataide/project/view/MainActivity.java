@@ -1,13 +1,15 @@
 package com.jpataide.project.view;
 
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,31 +32,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends BaseActivity implements Response.Listener<JSONObject>, Response.ErrorListener, View.OnClickListener, IServerHandler {
+public class MainActivity extends BaseActivity implements Response.Listener<JSONObject>, Response.ErrorListener, IServerHandler, SearchView.OnQueryTextListener {
     private ListView listItens;
-    private EditText edtBusca;
     private TextView txtExibindo;
-    private Button btnBuscar;
     private ItemAdapter livroAdapter = null;
-    private String query;
     private LivroUtils livroUtilsInstance;
     private final String TEXTO_EXIBINDO = "Exibindo %d de %d";
     public static final String INTENT_URL = "LIVRO_URL";
     private View progress;
     ProgressBar pbRodape;
+    private String lastQuery = "";
+    List<Item> livros;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         listItens = (ListView) findViewById(R.id.lst_lista);
-        edtBusca = (EditText) findViewById(R.id.edt_busca);
-        btnBuscar = (Button) findViewById(R.id.btn_busca);
         txtExibindo = (TextView) findViewById(R.id.txt_exibindo);
-        btnBuscar.setOnClickListener(this);
         progress = findViewById(R.id.progressBar);
-
-        edtBusca.setSelection(edtBusca.getText().length());
 
         listItens.addFooterView(getRodape());
 
@@ -69,14 +65,10 @@ public class MainActivity extends BaseActivity implements Response.Listener<JSON
             }
         });
 
-        query = edtBusca.getText().toString();
         livroUtilsInstance = AppController.getInstance().getLivroUtils();
 
-        livroUtilsInstance.setQuery(edtBusca.getText().toString());
-
-        txtExibindo.setText(String.format(TEXTO_EXIBINDO,0,0));
-
-        livroUtilsInstance.refreshList(this, query);
+        txtExibindo.setText(String.format(TEXTO_EXIBINDO, 0, 0));
+        livros = new ArrayList<>();
     }
 
     @Override
@@ -87,7 +79,6 @@ public class MainActivity extends BaseActivity implements Response.Listener<JSON
     @Override
     public void onResponse(JSONObject response) {
         progress.setVisibility(View.GONE);
-        List<Item> livros = new ArrayList<>();
 
         try {
             livros = livroUtilsInstance.getList(response);
@@ -98,23 +89,22 @@ public class MainActivity extends BaseActivity implements Response.Listener<JSON
                 pbRodape.setVisibility(View.VISIBLE);
             }
 
-        } catch (JSONException e){
+        } catch (JSONException e) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.atencao)
                     .setMessage(R.string.exception_json)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
                     }).setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
             AppController.getInstance().cancelPendingRequests();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.atencao)
                     .setMessage(R.string.exception_response)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
@@ -123,8 +113,8 @@ public class MainActivity extends BaseActivity implements Response.Listener<JSON
             e.printStackTrace();
         }
 
-        if(livroAdapter == null){
-            livroAdapter = new ItemAdapter(this,livros);
+        if (livroAdapter == null) {
+            livroAdapter = new ItemAdapter(this, livros);
             listItens.setAdapter(livroAdapter);
         } else {
             livroAdapter.notifyDataSetChanged();
@@ -147,22 +137,13 @@ public class MainActivity extends BaseActivity implements Response.Listener<JSON
         AppController.getInstance().cancelPendingRequests();
     }
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.btn_busca){
-            query = edtBusca.getText().toString();
-            livroUtilsInstance.refreshList(this, query);
-        }
-
-    }
-
-    private ProgressBar getRodape(){
+    private ProgressBar getRodape() {
         pbRodape = new ProgressBar(getBaseContext());
         pbRodape.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.WRAP_CONTENT, ListView.LayoutParams.WRAP_CONTENT));
         return pbRodape;
     }
 
-    public void connectToServer(String url){
+    public void connectToServer(String url) {
 
         JsonObjectRequest jsObjRequest =
                 new JsonObjectRequest(
@@ -173,5 +154,31 @@ public class MainActivity extends BaseActivity implements Response.Listener<JSON
                         this); // Response.ErrorListener
 
         AppController.getInstance().addToRequestQueue(jsObjRequest);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
+        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(this);
+        searchView.setQuery("android",true);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        if (!query.equals(lastQuery)) {
+            livroUtilsInstance.refreshList(this, query);
+            lastQuery = query;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
     }
 }

@@ -33,7 +33,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
                         View convertView, ViewGroup parent) {
 
         Context ctx = parent.getContext();
-        if (convertView == null){
+        if (convertView == null) {
             convertView = LayoutInflater.from(ctx)
                     .inflate(R.layout.item_lista, null);
         }
@@ -44,11 +44,18 @@ public class ItemAdapter extends ArrayAdapter<Item> {
 
         Item item = getItem(position);
         txt.setText(item.getVolumeInfo().getTitle());
-        img.setImageUrl(
-                item.getVolumeInfo().getImageLinks().getSmallThumbnail(),
-                AppController.getInstance().getImageLoader());
 
-        if(position == getCount() - 1){
+        if (item.getVolumeInfo().getImageLinks() != null) {
+            img.setImageUrl(
+                    item.getVolumeInfo().getImageLinks().getSmallThumbnail(),
+                    AppController.getInstance().getImageLoader());
+        } else {
+            img.setImageUrl(
+                    "",
+                    AppController.getInstance().getImageLoader());
+        }
+
+        if (position == getCount() - 1) {
             AppController.getInstance().getLivroUtils().refreshList((IServerHandler) getContext());
         }
 

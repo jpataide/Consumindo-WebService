@@ -10,6 +10,7 @@ import com.jpataide.project.R;
  * Created by jpataide on 8/17/15.
  */
 public abstract class BaseActivity extends AppCompatActivity{
+    protected Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,8 +18,8 @@ public abstract class BaseActivity extends AppCompatActivity{
         setupActionBar();
     }
 
-    private void setupActionBar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    protected void setupActionBar() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
 

@@ -1,5 +1,7 @@
 package com.jpataide.project.data;
 
+import com.jpataide.project.adapter.VolumeInfo;
+
 /**
  * Created by jpataide on 8/17/15.
  */
