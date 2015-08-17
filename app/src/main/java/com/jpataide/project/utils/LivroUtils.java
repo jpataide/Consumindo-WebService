@@ -40,12 +40,12 @@ public class LivroUtils {
             query = mQuery.replace(" ", "+");
         }
         serverHandler.connectToServer(String.format(url, query, currentIndex - 1, MAX_RESULTS));
-        currentIndex += MAX_RESULTS;
+        incCurrentIndex();
     }
 
     public void refreshList(IServerHandler serverHandler) {
         serverHandler.connectToServer(String.format(url, query, currentIndex - 1, MAX_RESULTS));
-        currentIndex += MAX_RESULTS;
+        incCurrentIndex();
     }
 
     public void getLivroDetails(IServerHandler serverHandler, String url) {
@@ -125,5 +125,12 @@ public class LivroUtils {
         String paginas = jsonInfo.getString(JSON_PAGE_COUNT);
 
         return new Livro(nome, thumbnail, selfLink, autores, editora, descicao, paginas);
+    }
+
+    private void incCurrentIndex(){
+        currentIndex += MAX_RESULTS;
+        if (currentIndex > MAX_RESULTS){
+            currentIndex = MAX_RESULTS;
+        }
     }
 }

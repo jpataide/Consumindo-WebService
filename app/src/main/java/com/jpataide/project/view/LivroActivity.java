@@ -1,10 +1,11 @@
 package com.jpataide.project.view;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -19,8 +20,8 @@ import com.jpataide.project.data.Livro;
 import com.jpataide.project.utils.AppController;
 import com.jpataide.project.utils.LivroUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 
 /**
@@ -77,9 +78,17 @@ public class LivroActivity extends Activity implements IServerHandler, Response.
 
     @Override
     public void onErrorResponse(VolleyError volleyError) {
-        Toast.makeText(this, "Erro!",
-                Toast.LENGTH_SHORT).show();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.atencao)
+                .setMessage(R.string.exception_connection)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
 
+        AppController.getInstance().cancelPendingRequests();
     }
 
     @Override
@@ -98,11 +107,41 @@ public class LivroActivity extends Activity implements IServerHandler, Response.
                         AppController.getInstance().getImageLoader());
                 progress.setVisibility(View.GONE);
                 layout.setVisibility(View.VISIBLE);
-                //this.notifyAll();
             }
 
-        } catch (Exception e){
+        } catch (JSONException e){
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.atencao)
+                    .setMessage(R.string.exception_json)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+            AppController.getInstance().cancelPendingRequests();
+
+        }
+        catch (Exception e){
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.atencao)
+                    .setMessage(R.string.exception_response)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
             e.printStackTrace();
         }
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AppController.getInstance().cancelPendingRequests();
+    }
+
 }

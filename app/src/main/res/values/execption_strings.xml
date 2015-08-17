@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="atencao">Atenção!</string>
+    <string name="exception_json">Ocorreu um erro durante a formatação da resposta.</string>
+    <string name="exception_response">Ocorreu um erro durante a recepção dos dados. Por favor cheque o satus da rede e tente novamente.</string>
+    <string name="exception_connection">Ocorreu um erro ao conectar com o servidor. Por favor cheque o satus da rede e tente novamente.</string>
+</resources>

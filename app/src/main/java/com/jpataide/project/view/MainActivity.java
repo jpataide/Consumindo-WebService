@@ -1,17 +1,17 @@
 package com.jpataide.project.view;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -24,6 +24,7 @@ import com.jpataide.project.data.Livro;
 import com.jpataide.project.utils.AppController;
 import com.jpataide.project.utils.LivroUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -86,7 +87,28 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
         try {
             livros = livroUtilsInstance.getList(response);
 
-        } catch (Exception e){
+        } catch (JSONException e){
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.atencao)
+                    .setMessage(R.string.exception_json)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+            AppController.getInstance().cancelPendingRequests();
+        }
+        catch (Exception e){
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.atencao)
+                    .setMessage(R.string.exception_response)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
             e.printStackTrace();
         }
 
@@ -101,10 +123,17 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
 
     @Override
     public void onErrorResponse(VolleyError volleyError) {
-        AppController.getInstance().cancelPendingRequests();
-        Toast.makeText(this, "Erro!",
-                Toast.LENGTH_SHORT).show();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.atencao)
+                .setMessage(R.string.exception_connection)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
 
+        AppController.getInstance().cancelPendingRequests();
     }
 
     @Override
