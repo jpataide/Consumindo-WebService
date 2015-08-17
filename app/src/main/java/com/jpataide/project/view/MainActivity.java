@@ -1,6 +1,5 @@
 package com.jpataide.project.view;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,8 +18,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.jpataide.project.Interfaces.IServerHandler;
 import com.jpataide.project.R;
-import com.jpataide.project.adapter.LivroAdapter;
-import com.jpataide.project.data.Livro;
+import com.jpataide.project.adapter.ItemAdapter;
+import com.jpataide.project.data.Item;
 import com.jpataide.project.utils.AppController;
 import com.jpataide.project.utils.LivroUtils;
 
@@ -31,12 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends Activity implements Response.Listener<JSONObject>, Response.ErrorListener, View.OnClickListener, IServerHandler {
+public class MainActivity extends BaseActivity implements Response.Listener<JSONObject>, Response.ErrorListener, View.OnClickListener, IServerHandler {
     private ListView listItens;
     private EditText edtBusca;
     private TextView txtExibindo;
     private Button btnBuscar;
-    private LivroAdapter livroAdapter = null;
+    private ItemAdapter livroAdapter = null;
     private String query;
     private LivroUtils livroUtilsInstance;
     private final String TEXTO_EXIBINDO = "Exibindo %d de %d";
@@ -47,8 +46,6 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_main);
 
         listItens = (ListView) findViewById(R.id.lst_lista);
         edtBusca = (EditText) findViewById(R.id.edt_busca);
@@ -66,7 +63,7 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, LivroActivity.class);
-                Livro item = livroAdapter.getItem(position);
+                Item item = livroAdapter.getItem(position);
                 intent.putExtra(INTENT_URL, item.getSelfLink());
                 startActivity(intent);
             }
@@ -83,9 +80,14 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
     }
 
     @Override
+    protected int getLayoutResId() {
+        return R.layout.activity_main;
+    }
+
+    @Override
     public void onResponse(JSONObject response) {
         progress.setVisibility(View.GONE);
-        List<Livro> livros = new ArrayList<Livro>();
+        List<Item> livros = new ArrayList<>();
 
         try {
             livros = livroUtilsInstance.getList(response);
@@ -122,7 +124,7 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
         }
 
         if(livroAdapter == null){
-            livroAdapter = new LivroAdapter(this,livros);
+            livroAdapter = new ItemAdapter(this,livros);
             listItens.setAdapter(livroAdapter);
         } else {
             livroAdapter.notifyDataSetChanged();

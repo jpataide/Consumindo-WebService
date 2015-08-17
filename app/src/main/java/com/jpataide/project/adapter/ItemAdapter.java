@@ -10,21 +10,20 @@ import android.widget.TextView;
 import com.android.volley.toolbox.NetworkImageView;
 import com.jpataide.project.Interfaces.IServerHandler;
 import com.jpataide.project.R;
-import com.jpataide.project.data.Livro;
+import com.jpataide.project.data.Item;
 import com.jpataide.project.utils.AppController;
-import com.jpataide.project.utils.LivroUtils;
 
 import java.util.List;
 
 /**
  * Created by jpataide on 8/16/15.
  */
-public class LivroAdapter extends ArrayAdapter<Livro> {
+public class ItemAdapter extends ArrayAdapter<Item> {
 
     static final int LAYOUT = R.layout.item_lista;
 
-    public LivroAdapter(Context context,
-                        List<Livro> objects) {
+    public ItemAdapter(Context context,
+                       List<Item> objects) {
 
         super(context, LAYOUT, objects);
     }
@@ -43,10 +42,10 @@ public class LivroAdapter extends ArrayAdapter<Livro> {
         TextView txt = (TextView)
                 convertView.findViewById(R.id.txt_Nome);
 
-        Livro item = getItem(position);
-        txt.setText(item.getNome());
+        Item item = getItem(position);
+        txt.setText(item.getVolumeInfo().getTitle());
         img.setImageUrl(
-                item.getImageUrl(),
+                item.getVolumeInfo().getImageLinks().getSmallThumbnail(),
                 AppController.getInstance().getImageLoader());
 
         if(position == getCount() - 1){

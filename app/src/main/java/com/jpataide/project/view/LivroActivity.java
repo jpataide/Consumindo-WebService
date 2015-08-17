@@ -1,6 +1,5 @@
 package com.jpataide.project.view;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -16,7 +15,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 import com.jpataide.project.Interfaces.IServerHandler;
 import com.jpataide.project.R;
-import com.jpataide.project.data.Livro;
+import com.jpataide.project.data.Item;
 import com.jpataide.project.utils.AppController;
 import com.jpataide.project.utils.LivroUtils;
 
@@ -27,7 +26,7 @@ import org.json.JSONObject;
 /**
  * Created by jpataide on 8/16/15.
  */
-public class LivroActivity extends Activity implements IServerHandler, Response.ErrorListener, Response.Listener<JSONObject> {
+public class LivroActivity extends BaseActivity implements IServerHandler, Response.ErrorListener, Response.Listener<JSONObject> {
     private LivroUtils livroUtilsInstance;
     private TextView txtTitulo, txtAutores, txtEditora, txtDescricao, txtPaginas;
     View progress, layout;
@@ -38,7 +37,6 @@ public class LivroActivity extends Activity implements IServerHandler, Response.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_livro);
         layout = findViewById(R.id.layout_livro);
         layout.setVisibility(View.GONE);
         progress = findViewById(R.id.progressBar2);
@@ -59,6 +57,11 @@ public class LivroActivity extends Activity implements IServerHandler, Response.
         livroUtilsInstance.getLivroDetails(this, url);
 
 
+    }
+
+    @Override
+    protected int getLayoutResId() {
+        return R.layout.activity_livro;
     }
 
     @Override
@@ -94,16 +97,16 @@ public class LivroActivity extends Activity implements IServerHandler, Response.
     @Override
     public void onResponse(JSONObject response) {
         try {
-            Livro livro = livroUtilsInstance.getDetails(response);
+            Item livro = livroUtilsInstance.getDetails(response);
 
             if (livro != null){
-                txtTitulo.setText(livro.getNome());
-                txtAutores.setText(livro.getAutores());
-                txtDescricao.setText(livro.getDescricao());
-                txtEditora.setText(livro.getEditora());
-                txtPaginas.setText(livro.getPaginas());
+                txtTitulo.setText(livro.getVolumeInfo().getTitle());
+                txtAutores.setText(livro.getVolumeInfo().getAutores());
+                txtDescricao.setText(livro.getVolumeInfo().getDescription());
+                txtEditora.setText(livro.getVolumeInfo().getPublisher());
+                txtPaginas.setText(livro.getVolumeInfo().getPageCount());
                 img.setImageUrl(
-                        livro.getImageUrl(),
+                        livro.getVolumeInfo().getImageLinks().getThumbnail(),
                         AppController.getInstance().getImageLoader());
                 progress.setVisibility(View.GONE);
                 layout.setVisibility(View.VISIBLE);

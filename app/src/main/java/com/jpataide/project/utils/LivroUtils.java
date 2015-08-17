@@ -1,9 +1,11 @@
 package com.jpataide.project.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.jpataide.project.Interfaces.IServerHandler;
-import com.jpataide.project.data.Livro;
+import com.jpataide.project.data.Item;
+import com.jpataide.project.data.Library;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,25 +15,12 @@ import java.util.ArrayList;
  * Created by jpataide on 8/16/15.
  */
 public class LivroUtils {
-    private ArrayList<Livro> livrosList = new ArrayList<>();
+    private ArrayList<Item> livrosList = new ArrayList<>();
     private static final int MAX_RESULTS = 20;
     private int currentIndex = 1;
     private String url = "https://www.googleapis.com/books/v1/volumes?q=%s&startIndex=%d&maxResults=%d&key=AIzaSyB3IJe_nrKT7DAzWJ5LlggjMNx_TQ6dP0Y";
     private String query;
     private int totalItems;
-    private final String JSON_TOTAL_ITEMS = "totalItems";
-    private final String JSON_ITEMS = "items";
-    private final String JSON_VOLUME_INFO = "volumeInfo";
-    private final String JSON_IMAGE_LINKS = "imageLinks";
-    private final String JSON_TITLE = "title";
-    private final String JSON_SMALL_THUMBNAIL = "smallThumbnail";
-    private final String JSON_SELF_LINK = "selfLink";
-    private final String JSON_SMALL_IMAGE = "small";
-    private final String JSON_AUTHORS = "authors";
-    private final String JSON_PUBLISHER = "publisher";
-    private final String JSON_DESCRIPTION = "description";
-    private final String JSON_PAGE_COUNT = "pageCount";
-
 
     public void refreshList(IServerHandler serverHandler, String mQuery) {
         if (!mQuery.equalsIgnoreCase(this.query)) {
@@ -59,41 +48,21 @@ public class LivroUtils {
         serverHandler.connectToServer(url);
     }
 
-    public ArrayList<Livro> getList(JSONObject jsonList) throws JSONException {
+    public ArrayList<Item> getList(JSONObject jsonList) throws JSONException {
+
+        Gson gson = new GsonBuilder().create();
+        Library library = gson.fromJson(jsonList.toString(), Library.class);
 
         if (totalItems == 0) {
-            totalItems = jsonList.getInt(JSON_TOTAL_ITEMS);
+            totalItems = library.getTotalItems();
             if (currentIndex >= totalItems){
                 currentIndex = totalItems + 1;
             }
         }
 
-        if (jsonList.has (JSON_ITEMS)) {
-            JSONArray livros = jsonList.getJSONArray(JSON_ITEMS);
-
-            for (int i = 0; i < livros.length(); i++) {
-                JSONObject jsonItem =
-                        livros.getJSONObject(i);
-                JSONObject jsonInfo = jsonItem.getJSONObject(JSON_VOLUME_INFO);
-
-                JSONObject jsonImage = null;
-                if (jsonInfo.has(JSON_IMAGE_LINKS)) {
-                    jsonImage = jsonInfo.getJSONObject(JSON_IMAGE_LINKS);
-                }
-
-                String nome =
-                        jsonInfo.getString(JSON_TITLE);
-
-                String thumbnail = "";
-                if (jsonImage != null) {
-                    thumbnail =
-                            jsonImage.getString(JSON_SMALL_THUMBNAIL);
-                }
-
-                String selfLink = jsonItem.getString(JSON_SELF_LINK);
-
-                Livro livro = new Livro(nome, thumbnail, selfLink);
-                livrosList.add(livro);
+        if (library != null){
+            if (library.getItems() != null){
+                livrosList.addAll(library.getItems());
             }
         }
 
@@ -112,39 +81,10 @@ public class LivroUtils {
         return totalItems;
     }
 
-    public Livro getDetails(JSONObject jsonObject) throws JSONException {
-
-        JSONObject jsonInfo = jsonObject.getJSONObject(JSON_VOLUME_INFO);
-
-        JSONObject jsonImage = jsonInfo.getJSONObject(JSON_IMAGE_LINKS);
-
-        String nome =
-                jsonInfo.getString(JSON_TITLE);
-        String thumbnail =
-                jsonImage.getString(JSON_SMALL_IMAGE);
-
-        JSONArray jsonAutores = jsonInfo.getJSONArray(JSON_AUTHORS);
-
-        String autores = "";
-        for (int i = 0; i < jsonAutores.length(); i++) {
-            autores = autores + (jsonAutores.getString(i) + System.getProperty("line.separator"));
-        }
-
-        autores = autores.substring(0, autores.lastIndexOf(System.getProperty("line.separator")));
-
-        String editora = jsonInfo.getString(JSON_PUBLISHER);
-
-        String descicao = "";
-
-        if (jsonInfo.has(JSON_DESCRIPTION)) {
-            descicao = jsonInfo.getString(JSON_DESCRIPTION);
-        }
-
-        String selfLink = jsonObject.getString(JSON_SELF_LINK);
-
-        String paginas = jsonInfo.getString(JSON_PAGE_COUNT);
-
-        return new Livro(nome, thumbnail, selfLink, autores, editora, descicao, paginas);
+    public Item getDetails(JSONObject jsonObject) throws JSONException {
+        Gson gson = new GsonBuilder().create();
+        Item item = gson.fromJson(jsonObject.toString(), Item.class);
+        return item;
     }
 
     private void incCurrentIndex(){
