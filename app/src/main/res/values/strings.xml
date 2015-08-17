@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Consumindo WebServices</string>
+    <string name="action_settings">Settings</string>
+    <string name="buscar">Buscar</string>
+    <string name="titulo">Título: </string>
+    <string name="autor">Autor(es): </string>
+    <string name="editora">Editora: </string>
+    <string name="descricao">Descrição: </string>
+    <string name="paginas">Páginas: </string>
+</resources>
