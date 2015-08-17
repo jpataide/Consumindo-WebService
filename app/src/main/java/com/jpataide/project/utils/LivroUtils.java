@@ -14,9 +14,9 @@ import java.util.ArrayList;
  */
 public class LivroUtils {
     private ArrayList<Livro> livrosList = new ArrayList<>();
-    private static final int MAX_RESULTS = 10;
+    private static final int MAX_RESULTS = 20;
     private int currentIndex = 1;
-    private String url = "https://www.googleapis.com/books/v1/volumes?q=%s&startIndex=%d&maxResults=%d";
+    private String url = "https://www.googleapis.com/books/v1/volumes?q=%s&startIndex=%d&maxResults=%d&key=AIzaSyB3IJe_nrKT7DAzWJ5LlggjMNx_TQ6dP0Y";
     private String query;
     private int totalItems;
     private final String JSON_TOTAL_ITEMS = "totalItems";
@@ -38,12 +38,19 @@ public class LivroUtils {
             livrosList.clear();
             currentIndex = 1;
             query = mQuery.replace(" ", "+");
+            totalItems = 0;
         }
+        if (totalItems > 0 && currentIndex > totalItems)
+            return;
+
         serverHandler.connectToServer(String.format(url, query, currentIndex - 1, MAX_RESULTS));
         incCurrentIndex();
     }
 
     public void refreshList(IServerHandler serverHandler) {
+        if (totalItems > 0 && currentIndex > totalItems)
+            return;
+
         serverHandler.connectToServer(String.format(url, query, currentIndex - 1, MAX_RESULTS));
         incCurrentIndex();
     }
@@ -56,25 +63,38 @@ public class LivroUtils {
 
         if (totalItems == 0) {
             totalItems = jsonList.getInt(JSON_TOTAL_ITEMS);
+            if (currentIndex >= totalItems){
+                currentIndex = totalItems + 1;
+            }
         }
-        JSONArray livros = jsonList.getJSONArray(JSON_ITEMS);
 
-        for (int i = 0; i < livros.length(); i++) {
-            JSONObject jsonItem =
-                    livros.getJSONObject(i);
-            JSONObject jsonInfo = jsonItem.getJSONObject(JSON_VOLUME_INFO);
+        if (jsonList.has (JSON_ITEMS)) {
+            JSONArray livros = jsonList.getJSONArray(JSON_ITEMS);
 
-            JSONObject jsonImage = jsonInfo.getJSONObject(JSON_IMAGE_LINKS);
+            for (int i = 0; i < livros.length(); i++) {
+                JSONObject jsonItem =
+                        livros.getJSONObject(i);
+                JSONObject jsonInfo = jsonItem.getJSONObject(JSON_VOLUME_INFO);
 
-            String nome =
-                    jsonInfo.getString(JSON_TITLE);
-            String thumbnail =
-                    jsonImage.getString(JSON_SMALL_THUMBNAIL);
+                JSONObject jsonImage = null;
+                if (jsonInfo.has(JSON_IMAGE_LINKS)) {
+                    jsonImage = jsonInfo.getJSONObject(JSON_IMAGE_LINKS);
+                }
 
-            String selfLink = jsonItem.getString(JSON_SELF_LINK);
+                String nome =
+                        jsonInfo.getString(JSON_TITLE);
 
-            Livro livro = new Livro(nome, thumbnail, selfLink);
-            livrosList.add(livro);
+                String thumbnail = "";
+                if (jsonImage != null) {
+                    thumbnail =
+                            jsonImage.getString(JSON_SMALL_THUMBNAIL);
+                }
+
+                String selfLink = jsonItem.getString(JSON_SELF_LINK);
+
+                Livro livro = new Livro(nome, thumbnail, selfLink);
+                livrosList.add(livro);
+            }
         }
 
         return livrosList;
@@ -129,8 +149,12 @@ public class LivroUtils {
 
     private void incCurrentIndex(){
         currentIndex += MAX_RESULTS;
-        if (currentIndex > MAX_RESULTS){
-            currentIndex = MAX_RESULTS;
+        if (currentIndex > totalItems && totalItems > 0){
+            currentIndex = totalItems + 1;
         }
+    }
+
+    public boolean isEndOfList(){
+        return currentIndex > totalItems;
     }
 }

@@ -42,6 +42,7 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
     private final String TEXTO_EXIBINDO = "Exibindo %d de %d";
     public static final String INTENT_URL = "LIVRO_URL";
     private View progress;
+    ProgressBar pbRodape;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,8 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
         txtExibindo = (TextView) findViewById(R.id.txt_exibindo);
         btnBuscar.setOnClickListener(this);
         progress = findViewById(R.id.progressBar);
+
+        edtBusca.setSelection(edtBusca.getText().length());
 
         listItens.addFooterView(getRodape());
 
@@ -86,6 +89,12 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
 
         try {
             livros = livroUtilsInstance.getList(response);
+
+            if (livroUtilsInstance.isEndOfList()) {
+                pbRodape.setVisibility(View.GONE);
+            } else {
+                pbRodape.setVisibility(View.VISIBLE);
+            }
 
         } catch (JSONException e){
             new AlertDialog.Builder(this)
@@ -146,9 +155,9 @@ public class MainActivity extends Activity implements Response.Listener<JSONObje
     }
 
     private ProgressBar getRodape(){
-        ProgressBar pb = new ProgressBar(getBaseContext());
-        pb.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.WRAP_CONTENT, ListView.LayoutParams.WRAP_CONTENT));
-        return pb;
+        pbRodape = new ProgressBar(getBaseContext());
+        pbRodape.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.WRAP_CONTENT, ListView.LayoutParams.WRAP_CONTENT));
+        return pbRodape;
     }
 
     public void connectToServer(String url){
